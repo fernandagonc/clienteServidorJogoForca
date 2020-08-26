@@ -53,40 +53,32 @@ int main(int argc, char *argv[]){
 
 	while(1){
        	
-        count = recv(sockfd, servidorBuffer + total, BUFSZ - total, 0);
+        count = recv(sockfd, servidorBuffer, BUFSZ, 0);
 		printf("msg servidor %zu bytes\n", count); 
 
-		//  if (count == 0) {
-		 	// Connection terminated.
-		 	//printf("msg recebida servidor %zu bytes\n", count);
-			puts(servidorBuffer);
+		puts(servidorBuffer);
 
-			if(charToInt(servidorBuffer[0]) == 4){
-				break;
-			}
-			printf("palpite> ");
-			fgets(palpiteBuffer, palpiteSZ-1, stdin);
+		if(charToInt(servidorBuffer[0]) == 4){
+			break;
+		}
+		printf("palpite> ");
+		fgets(palpiteBuffer, palpiteSZ-1, stdin);
+		palpite[0] = '2';
+		strcat(palpite, palpiteBuffer);
+		count = send(sockfd, palpite, strlen(palpite), 0);
+
+		if (count != strlen(palpite)) {
+			printf("Erro no envio do palpite\n");
+			close(sockfd);
+			exit(1);
+		}
+		else{
+			printf("with %zu bytes palpite enviado %s", count, palpite);
+			memset(palpite, 0, palpiteSZ+1);
+			memset(servidorBuffer, 0, BUFSZ);
+			memset(palpiteBuffer, 0, palpiteSZ);
 			palpite[0] = '2';
-			strcat(palpite, palpiteBuffer);
-			count = send(sockfd, palpite, strlen(palpite), 0);
-
-			if (count != strlen(palpite)) {
-				printf("Failure Sending Palpite\n");
-                close(sockfd);
-                exit(1);
-			}
-			else{
-				printf("with %zu bytes palpite enviado %s", count, palpite);
-				memset(palpite, 0, palpiteSZ+1);
-				memset(servidorBuffer, 0, BUFSZ);
-				memset(palpiteBuffer, 0, palpiteSZ);
-				palpite[0] = '2';
-				total = 0;	
-			}		
-			// break;
-		// }
-		// total += count;
-	
+		}		
 	}
 
 	close(sockfd);

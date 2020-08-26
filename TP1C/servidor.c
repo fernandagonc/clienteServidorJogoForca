@@ -10,14 +10,11 @@
 
 #define BUFSZ 1024
 
-
 void usage(char **argv) {
 	printf("Usage: %s <v4|v6> <PORTA-servidor>\n", argv[0]);
 	printf("Example: %s v4 51511\n", argv[0]);
 	exit(EXIT_FAILURE);
 }
-
-
 
 int palpiteRepetido(char *historicoPalpites, char *palpite){
     char *m;
@@ -104,15 +101,15 @@ int main(int argc, char *argv[]){
     
 	int enable = 1;
     if (0 != setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int))) {
-        printf("setsockopt");
+        printf("Erro na função setsockopt");
     }
 
     struct sockaddr *addr = (struct sockaddr *)(&storage);
     if (0 != bind(sockfd, addr, sizeof(storage))) {
-        printf("bind");
+        printf("Erro no bind");
     }
     if (0 != listen(sockfd, 10)) {
-        printf("listen");
+        printf("Erro no listen");
     }
 
     size_t count;
@@ -124,8 +121,6 @@ int main(int argc, char *argv[]){
     size_t controleFimJogo = strlen(palavra);
     inicioJogo[1] = intToChar(controleFimJogo);
     inicioJogo[2] = '\0';
-    printf("controle: %zu, %s \n", controleFimJogo, palavra);
-    printf("inicioJogo: %s \n", inicioJogo);
 
     char *resposta;
     resposta = malloc(controleFimJogo+2);
@@ -142,7 +137,7 @@ int main(int argc, char *argv[]){
     
     count = send(clientfd, inicioJogo, strlen(inicioJogo), 0) ;
     if(count != strlen(inicioJogo)){
-        printf("Failure Sending Message\n");
+        printf("Erro no envio da mensagem\n");
         exit(1);
     }
     else{
@@ -156,45 +151,36 @@ int main(int argc, char *argv[]){
     memset(historicoPalpites, 0, BUFSZ);
 
 
-    while(1){
     
-       	while(1){
-            count = recv(clientfd, buf + total, BUFSZ - total, 0);
-		    printf("msg cliente %zu bytes: %s\n", count, buf); 
- 
-            // if (count == 0) {
-                resposta = checarPalpite(historicoPalpites, buf, palavra);
-                strcat(historicoPalpites, &buf[1]);
-                puts(resposta);
-                int acertos = getNumeroAcertos(resposta);
-                controleFimJogo = controleFimJogo - acertos;
-                printf("acertos: %d, controle %zu\n", acertos, controleFimJogo); 
+    while(1){
+        count = recv(clientfd, buf + total, BUFSZ - total, 0);
+        printf("msg cliente %zu bytes: %s\n", count, buf); 
 
-                if(controleFimJogo == 0){
-                    send(clientfd, "4", strlen("4"), 0);
-                    puts("you won!!!");
-                    close(sockfd);
-                    close(clientfd);
-                    return 1;
-                }else{
-                    count = send(clientfd, resposta, strlen(resposta), 0) ;
-                    if(count != strlen(resposta)){
-                        printf("Failure Sending Message\n");
-                        exit(1);
-                    }
-                    else{
-                        printf("message sent with %zu bytes, %s\n", count, resposta);
-                    };
+        resposta = checarPalpite(historicoPalpites, buf, palavra);
+        strcat(historicoPalpites, &buf[1]);
+        puts(resposta);
+        int acertos = getNumeroAcertos(resposta);
+        controleFimJogo = controleFimJogo - acertos;
+        printf("acertos: %d, controle %zu\n", acertos, controleFimJogo); 
 
-                };
-                
-                total = 0;
-            // }
-            // total += count;
+        if(controleFimJogo == 0){
+            send(clientfd, "4", strlen("4"), 0);
+            close(sockfd);
+            close(clientfd);
+            return 1;
+        }
+        else{
+            count = send(clientfd, resposta, strlen(resposta), 0) ;
+            if(count != strlen(resposta)){
+                printf("Erro no envio da mensagem\n");
+                exit(1);
+            }
+            else{
+                printf("message sent with %zu bytes, %s\n", count, resposta);
+            };
 
-        }       
-        //close(clientfd);
-    }
+        };
+    };
     
     puts("closing socket");
     close(sockfd);
