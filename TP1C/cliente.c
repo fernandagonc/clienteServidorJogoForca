@@ -45,7 +45,6 @@ int main(int argc, char *argv[]){
 	char servidorBuffer[BUFSZ];
 	char palpiteBuffer[palpiteSZ];
 	char palpite[palpiteSZ+1] ;
-	unsigned total = 0;
 	size_t count;
 	memset(palpite, 0, palpiteSZ+1);
 	memset(servidorBuffer, 0, BUFSZ);

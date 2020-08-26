@@ -48,6 +48,8 @@ char * checarPalpite(char *historicoPalpites, char *palpite, char *palavra){
     resposta[1] = intToChar(letrasCorretas);
 
     if(palpiteRepetido(historicoPalpites,  &palpite[1])){
+        free(posicoesCorretas);
+        free(posicao);
         return resposta;
     };
 
@@ -66,6 +68,9 @@ char * checarPalpite(char *historicoPalpites, char *palpite, char *palavra){
 
     resposta[1] = intToChar(letrasCorretas);
     strcat(resposta, posicoesCorretas); 
+    
+    free(posicoesCorretas);
+    free(posicao);
 
     return resposta;
 };
@@ -82,7 +87,7 @@ int getNumeroAcertos(char *resposta){
 
 int main(int argc, char *argv[]){
 
-	if (argc < 3) {
+	if (argc != 3) {
         usage(argv);
     }
 
@@ -112,10 +117,8 @@ int main(int argc, char *argv[]){
         printf("Erro no listen");
     }
 
-    size_t count;
-    int clientfd;
-    char inicioJogo[2];
     char *palavra = "servidor";
+    char inicioJogo[2];
     inicioJogo[0] = '1';
     inicioJogo[1] = '0';
     size_t controleFimJogo = strlen(palavra);
@@ -124,8 +127,9 @@ int main(int argc, char *argv[]){
 
     char *resposta;
     resposta = malloc(controleFimJogo+2);
-	unsigned total = 0;
 
+    size_t count;
+    int clientfd;
     struct sockaddr_storage client_storage;
     struct sockaddr *client_addr = (struct sockaddr *)(&client_storage);
     socklen_t client_addrlen = sizeof(client_storage);
@@ -153,7 +157,7 @@ int main(int argc, char *argv[]){
 
     
     while(1){
-        count = recv(clientfd, buf + total, BUFSZ - total, 0);
+        count = recv(clientfd, buf, BUFSZ, 0);
         printf("msg cliente %zu bytes: %s\n", count, buf); 
 
         resposta = checarPalpite(historicoPalpites, buf, palavra);
@@ -165,8 +169,10 @@ int main(int argc, char *argv[]){
 
         if(controleFimJogo == 0){
             send(clientfd, "4", strlen("4"), 0);
-            close(sockfd);
             close(clientfd);
+            close(sockfd);
+            free(resposta);
+            free(historicoPalpites);
             return 1;
         }
         else{
@@ -181,8 +187,10 @@ int main(int argc, char *argv[]){
 
         };
     };
-    
-    puts("closing socket");
-    close(sockfd);
 
+    close(clientfd);
+    close(sockfd);
+    free(resposta);
+    free(historicoPalpites);
+    return 1;
 }
