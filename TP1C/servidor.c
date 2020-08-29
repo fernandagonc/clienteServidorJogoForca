@@ -11,14 +11,13 @@
 #define BUFSZ 1024
 
 void usage(char **argv) {
-	printf("Usage: %s <v4|v6> <PORTA-servidor>\n", argv[0]);
-	printf("Example: %s v4 51511\n", argv[0]);
+	printf("Uso: %s <v4|v6> <PORTA-servidor>\n", argv[0]);
+	printf("Exemplo de uso: %s v4 51511\n", argv[0]);
 	exit(EXIT_FAILURE);
 }
 
 int palpiteRepetido(char *historicoPalpites, char *palpite){
     char *m;
-    printf("historico: %s\n", historicoPalpites);
 
     for (m = historicoPalpites; *m!= '\0'; m++){
         if (tolower(*m) == tolower(palpite[0])){            
@@ -125,6 +124,12 @@ int main(int argc, char *argv[]){
     inicioJogo[1] = intToChar(controleFimJogo);
     inicioJogo[2] = '\0';
 
+
+    char buf[BUFSZ];
+    memset(buf, 0, BUFSZ);
+    char *historicoPalpites;
+    historicoPalpites = malloc(BUFSZ);
+    memset(historicoPalpites, 0, BUFSZ);
     char *resposta;
     resposta = malloc(controleFimJogo+2);
 
@@ -135,8 +140,8 @@ int main(int argc, char *argv[]){
     socklen_t client_addrlen = sizeof(client_storage);
     
     clientfd = accept(sockfd, client_addr, &client_addrlen);
-    if (clientfd != -1) {
-        printf("connected to %d \n", clientfd);
+    if (clientfd == -1) {
+        printf("Erro ao tentar conectar-se ao servidor\n");
     };
     
     count = send(clientfd, inicioJogo, strlen(inicioJogo), 0) ;
@@ -144,16 +149,6 @@ int main(int argc, char *argv[]){
         printf("Erro no envio da mensagem\n");
         exit(1);
     }
-    else{
-        printf("Message sent with %zu bytes\n", count);
-    };
-
-    char buf[BUFSZ];
-    memset(buf, 0, BUFSZ);
-    char *historicoPalpites;
-    historicoPalpites = malloc(BUFSZ);
-    memset(historicoPalpites, 0, BUFSZ);
-
 
     
     while(1){
@@ -167,7 +162,7 @@ int main(int argc, char *argv[]){
         controleFimJogo = controleFimJogo - acertos;
         printf("acertos: %d, controle %zu\n", acertos, controleFimJogo); 
 
-        if(controleFimJogo == 0){
+        if(controleFimJogo == 0){//controle da vitória
             send(clientfd, "4", strlen("4"), 0);
             close(clientfd);
             close(sockfd);
@@ -181,9 +176,6 @@ int main(int argc, char *argv[]){
                 printf("Erro no envio da mensagem\n");
                 exit(1);
             }
-            else{
-                printf("message sent with %zu bytes, %s\n", count, resposta);
-            };
 
         };
     };

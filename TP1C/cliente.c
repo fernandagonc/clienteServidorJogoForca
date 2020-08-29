@@ -8,8 +8,8 @@
 #include "common.h"
 //converter padrão de rede - função host to network / network to host
 void usage(char **argv) {
-	printf("Usage: %s <IP-servidor> <PORT-servidor>\n", argv[0]);
-	printf("Example: %s 127.0.0.1 51511\n", argv[0]);
+	printf("Uso: %s <IP-servidor> <PORT-servidor>\n", argv[0]);
+	printf("Exemplo de uso: %s 127.0.0.1 51511\n", argv[0]);
 	exit(EXIT_FAILURE);
 }
 
@@ -49,20 +49,18 @@ int main(int argc, char *argv[]){
 	memset(palpite, 0, palpiteSZ+1);
 	memset(servidorBuffer, 0, BUFSZ);
 	memset(palpiteBuffer, 0, palpiteSZ);
+	palpite[0] = '2';
 
 	while(1){
        	
         count = recv(sockfd, servidorBuffer, BUFSZ, 0);
-		printf("msg servidor %zu bytes\n", count); 
-
 		puts(servidorBuffer);
 
 		if(charToInt(servidorBuffer[0]) == 4){
 			break;
 		}
-		printf("palpite> ");
+		printf("Palpite> ");
 		fgets(palpiteBuffer, palpiteSZ-1, stdin);
-		palpite[0] = '2';
 		strcat(palpite, palpiteBuffer);
 		count = send(sockfd, palpite, strlen(palpite), 0);
 
@@ -72,7 +70,6 @@ int main(int argc, char *argv[]){
 			exit(1);
 		}
 		else{
-			printf("with %zu bytes palpite enviado %s", count, palpite);
 			memset(palpite, 0, palpiteSZ+1);
 			memset(servidorBuffer, 0, BUFSZ);
 			memset(palpiteBuffer, 0, palpiteSZ);
