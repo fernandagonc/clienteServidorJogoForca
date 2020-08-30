@@ -6,7 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "common.h"
-//converter padrão de rede - função host to network / network to host
+
 void usage(char **argv) {
 	printf("Uso: %s <IP-servidor> <PORT-servidor>\n", argv[0]);
 	printf("Exemplo de uso: %s 127.0.0.1 51511\n", argv[0]);
@@ -32,14 +32,14 @@ int main(int argc, char *argv[]){
     
     if((sockfd) < 0){
         printf("\n Erro : Não foi possível criar o socket \n");
-        return 1;
+        exit(1);
     } 
 	
 	struct sockaddr *addr = (struct sockaddr *)(&storage);
 
     if(0 != connect(sockfd, addr, sizeof(storage))){
        printf("\n Erro : Falha na conexão\n");
-       return 1;
+       exit(1);
     } 
 
 	char servidorBuffer[BUFSZ];
