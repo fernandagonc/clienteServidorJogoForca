@@ -153,14 +153,14 @@ int main(int argc, char *argv[]){
     
     while(1){
         count = recv(clientfd, buf, BUFSZ, 0);
-        printf("msg cliente %zu bytes: %s\n", count, buf); 
+        printf("Mensagem recebida com %zu bytes: %s\n", count, buf); 
 
         resposta = checarPalpite(historicoPalpites, buf, palavra);
         strcat(historicoPalpites, &buf[1]);
         puts(resposta);
         int acertos = getNumeroAcertos(resposta);
         controleFimJogo = controleFimJogo - acertos;
-        printf("acertos: %d, controle %zu\n", acertos, controleFimJogo); 
+        printf("Acertos: %d, Controle %zu\n", acertos, controleFimJogo); 
 
         if(controleFimJogo == 0){//controle da vitória
             send(clientfd, "4", strlen("4"), 0);
