@@ -16,6 +16,10 @@ void usage(char **argv) {
 #define BUFSZ 1024
 #define palpiteSZ 100
 
+int parseAddr(const char *addrstr, const char *portstr, struct sockaddr_storage *storage);
+void acertosNasPosicoes(char *respostaServidor);
+
+
 int main(int argc, char *argv[]){
 
     if(argc != 3){
@@ -23,7 +27,7 @@ int main(int argc, char *argv[]){
     } 
 
 	struct sockaddr_storage storage;
-	if (0 != addrparse(argv[1], argv[2], &storage)) {
+	if (0 != parseAddr(argv[1], argv[2], &storage)) {
 		usage(argv);
 	} 
 
@@ -54,12 +58,18 @@ int main(int argc, char *argv[]){
 	while(1){
        	
         count = recv(sockfd, servidorBuffer, BUFSZ, 0);
-		puts(servidorBuffer);
-
+		if(charToInt(servidorBuffer[0]) == 1){
+			printf("A palavra a ser adivinhada tem %s letras\n", &servidorBuffer[1]);
+		}
+		else if(charToInt(servidorBuffer[0]) == 3){
+			acertosNasPosicoes(servidorBuffer);
+		}
+		
 		if(charToInt(servidorBuffer[0]) == 4){
+			printf("Você acertou todas as letras da palavra!\n");
 			break;
 		}
-		printf("Palpite> ");
+		printf("Digite um palpite> ");
 		fgets(palpiteBuffer, palpiteSZ-1, stdin);
 		strcat(palpite, palpiteBuffer);
 		count = send(sockfd, palpite, strlen(palpite), 0);
@@ -80,4 +90,55 @@ int main(int argc, char *argv[]){
 	close(sockfd);
 
     return 0;
-}
+};
+
+int parseAddr(const char *addrstr, const char *portstr, struct sockaddr_storage *storage) {
+    if (addrstr == NULL || portstr == NULL) {
+        return -1;
+    }
+
+    uint16_t port = (uint16_t)atoi(portstr); 
+    if (port == 0) {
+        return -1;
+    }
+    port = htons(port); 
+
+    struct in_addr inaddr4; // 32-bit IP address
+    if (inet_pton(AF_INET, addrstr, &inaddr4)) {
+        struct sockaddr_in *addr4 = (struct sockaddr_in *)storage;
+        addr4->sin_family = AF_INET;
+        addr4->sin_port = port;
+        addr4->sin_addr = inaddr4;
+        return 0;
+    }
+
+    struct in6_addr inaddr6; // 128-bit IPv6 address
+    if (inet_pton(AF_INET6, addrstr, &inaddr6)) {
+        struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *)storage;
+        addr6->sin6_family = AF_INET6;
+        addr6->sin6_port = port;
+        memcpy(&(addr6->sin6_addr), &inaddr6, sizeof(inaddr6));
+        return 0;
+    }
+
+    return -1;
+};
+
+void acertosNasPosicoes(char *respostaServidor){
+	char* p;
+	p = &respostaServidor[1];
+	printf("Essa letra aparece %d vez(es) \n", charToInt(*p));
+	
+	if(charToInt(*p) == 0){
+		printf("\n");
+		return;
+	}
+
+	printf("Posição(ões) na palavra: ");
+    for (p = &respostaServidor[2]; *p!= '\0'; p++){
+        printf("%d, ", charToInt(*p));
+    }
+	printf("\n \n");
+	return;
+
+};
