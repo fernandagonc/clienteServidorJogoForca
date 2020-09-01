@@ -47,12 +47,10 @@ int main(int argc, char *argv[]){
     } 
 
 	char servidorBuffer[BUFSZ];
-	char palpiteBuffer[palpiteSZ];
-	char palpite[palpiteSZ+1] ;
+	char palpite[2];
 	size_t count;
 	memset(palpite, 0, palpiteSZ+1);
 	memset(servidorBuffer, 0, BUFSZ);
-	memset(palpiteBuffer, 0, palpiteSZ);
 	palpite[0] = '2';
 
 	while(1){
@@ -70,8 +68,9 @@ int main(int argc, char *argv[]){
 			break;
 		}
 		printf("Digite um palpite> ");
-		fgets(palpiteBuffer, palpiteSZ-1, stdin);
-		strcat(palpite, palpiteBuffer);
+		char letra;
+		scanf(" %c", &letra);
+		palpite[1] = letra;
 		count = send(sockfd, palpite, strlen(palpite), 0);
 
 		if (count != strlen(palpite)) {
@@ -82,7 +81,6 @@ int main(int argc, char *argv[]){
 		else{
 			memset(palpite, 0, palpiteSZ+1);
 			memset(servidorBuffer, 0, BUFSZ);
-			memset(palpiteBuffer, 0, palpiteSZ);
 			palpite[0] = '2';
 		}		
 	}
