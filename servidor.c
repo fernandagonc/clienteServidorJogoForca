@@ -9,28 +9,29 @@
 #include <ctype.h> 
 
 #define BUFSZ 1024
+#define PROTOCOLO "v4"
 
 int inicializarSocketAddr(const char *proto, const char *portstr, struct sockaddr_storage *storage);
 int palpiteRepetido(char *historicoPalpites, char *palpite);
 char *checarPalpite(char *historicoPalpites, char *palpite, char *palavra);
 int getNumeroAcertos(char *resposta);
 
-void usage(char **argv) {
-	printf("Uso: %s <v4|v6> <PORTA-servidor>\n", argv[0]);
-	printf("Exemplo de uso: %s v4 51511\n", argv[0]);
+void usage() {
+	printf("Uso:<PORTA-servidor>\n");
+	printf("Exemplo de uso:  51511\n");
 	exit(EXIT_FAILURE);
 }
 
 
 int main(int argc, char *argv[]){
 
-	if (argc != 3) {
-        usage(argv);
+	if (argc != 2) {
+        usage();
     }
 
 	struct sockaddr_storage storage;
-    if (0 != inicializarSocketAddr(argv[1], argv[2], &storage)) {
-        usage(argv);
+    if (0 != inicializarSocketAddr(PROTOCOLO, argv[1], &storage)) {
+        usage();
     }
 
 	int sockfd;
